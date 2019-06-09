@@ -41,15 +41,17 @@ type Game = { Grid: bool[][] } with
         this.Grid.[correctIndex i this.RowCount].[correctIndex j this.ColumnCount]
 
     member this.countLivingNeigbours i j =
-        let isNeighbour iAdd jAdd = iAdd <> jAdd || iAdd <> 0
         // TODO: remade this block
-        let shifts = [ -1..1 ]
-        let mutable count = 0
-        for iShift in shifts do
-            for jShift in shifts do
-                if isNeighbour iShift jShift && this.isLivingCell(i + iShift, j + jShift) then
-                    count <- count + 1
-        count
+        let shifts = { -1..1 }
+        let correctPair (i, j) = (correctIndex i this.RowCount, correctIndex j this.ColumnCount)
+        shifts
+        |> Seq.collect (fun i -> seq { for j in shifts -> (i, j) })
+        |> Seq.filter (fun (i, j) -> i <> 0 || j <> 0)
+        |> Seq.map (fun (iAdd, jAdd) -> (i + iAdd, j + jAdd))
+        |> Seq.map correctPair
+        |> Seq.map this.isLivingCell
+        |> Seq.filter id
+        |> Seq.length
 
     member private this.processCell i j =
         let livingCount = this.countLivingNeigbours i j
