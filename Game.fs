@@ -8,11 +8,6 @@ type private Change = {
     state: bool
 }
 
-let private correctIndex index maxIndex =
-    match index with
-    | index when index >= maxIndex -> index % maxIndex
-    | index when index < 0 -> index + maxIndex
-    | _ -> index
 
 let private doDelay (msDelay: int) =
     System.Threading.Thread.Sleep(msDelay)
@@ -41,15 +36,26 @@ type Game = { Grid: bool[][] } with
         this.Grid.[i].[j]
 
     member this.countLivingNeigbours i j =
-        // TODO: remade this block
+
+        let correctIndex index maxIndex =
+            match index with
+            | index when index >= maxIndex -> index % maxIndex
+            | index when index < 0 -> index + maxIndex
+            | _ -> index
+
+        let correctPair (i, j) =
+            (correctIndex i this.RowCount, correctIndex j this.ColumnCount)
+
+        let addCenterIndices (iShift, jShift) =
+            (i + iShift, j + jShift)
+
+        // TODO: try calc adds once
         let shifts = { -1..1 }
-        let correctPair (i, j) = (correctIndex i this.RowCount, correctIndex j this.ColumnCount)
         shifts
         |> Seq.collect (fun i -> seq { for j in shifts -> (i, j) })
         |> Seq.filter (fun (i, j) -> i <> 0 || j <> 0)
-        |> Seq.map (fun (iAdd, jAdd) -> (i + iAdd, j + jAdd))
-        |> Seq.map correctPair
-        |> Seq.map this.isLivingCell
+        // |> Seq.toList
+        |> Seq.map (addCenterIndices >> correctPair >> this.isLivingCell)
         |> Seq.filter id
         |> Seq.length
 
