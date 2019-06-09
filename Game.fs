@@ -2,38 +2,28 @@
 
 open System.IO
 
-//type private cellChange = {
-//    i: int
-//    j: int
-//    state: bool
-//}
-
 type private Change = {
     i: int
     j: int
     state: bool
 }
 
+let correctIndex index maxIndex =
+    match index with
+    | index when index >= maxIndex -> index % maxIndex
+    | index when index < 0 -> index + maxIndex
+    | _ -> index
+
 type Game(grid: bool[][]) =  // TODO: with bool[,]
-    let rowCount = grid.Length
-    let columnCount = grid.[0].Length
-
-    let correctIndex index maxIndex =  // TODO with match
-        if index < 0 then
-            index + maxIndex
-        elif index >= maxIndex then
-            index % maxIndex
-        else
-            index
-
     let isLivingCell(i, j) =
+        let rowCount = grid.Length
+        let columnCount = grid.[0].Length
         grid.[correctIndex i rowCount].[correctIndex j columnCount]
 
     let countLivingNeigbours i j =
-        let isNeighbour iAdd jAdd =
-            iAdd <> jAdd || iAdd <> 0
+        let isNeighbour iAdd jAdd = iAdd <> jAdd || iAdd <> 0
         // TODO: remade this block
-        let shifts = [-1..1]
+        let shifts = [ -1..1 ]
         let mutable count = 0
         for iShift in shifts do
             for jShift in shifts do
@@ -41,7 +31,7 @@ type Game(grid: bool[][]) =  // TODO: with bool[,]
                     count <- count + 1
         count
 
-    let processCell i j : Change option =
+    let processCell i j =
         let livingCount = countLivingNeigbours i j
         if isLivingCell(i, j) then
             if livingCount < 2 || livingCount > 3 then
@@ -84,7 +74,6 @@ type Game(grid: bool[][]) =  // TODO: with bool[,]
 
         printfn "%s" stringGrid
 
-    member public this.Grid = grid
     member public this.RunInConsoleWithDelay msDelay =
         for count in Seq.initInfinite((+)1) do
             clearScreen()
