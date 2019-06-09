@@ -38,7 +38,7 @@ let private printGrid grid =
 // TODO: with bool[,]
 type Game = { Grid: bool[][] } with
     member this.isLivingCell(i, j) =
-        this.Grid.[correctIndex i this.RowCount].[correctIndex j this.ColumnCount]
+        this.Grid.[i].[j]
 
     member this.countLivingNeigbours i j =
         // TODO: remade this block
